@@ -1,0 +1,92 @@
+# Synthetic-data demonstration of the agentic TCAD calibration workflow.
+# Every value below is an illustrative demo choice unless marked "paper".
+# Nothing here is a calibrated value from the paper or from any real device.
+
+run:
+  seed: 2609
+
+sweep:          # forward I_D-V_G sweep
+  vg_min: -1.5
+  vg_max: 2.5
+  vg_step: 0.02
+
+device:         # geometry follows the paper's Table III; the rest is illustrative
+  width_um: 5.0
+  t_ch_nm: 3.5
+  t_ox_nm: 7.0
+  eps_ox: 20.0
+  chi_ch_ev: 4.30
+  n_interface: 0.10
+  rho_c0_ohm_cm: 0.20
+  contact_ideality: 4.0
+
+# The synthetic "measured" device. It contains physics the calibration model does not have
+# (gate-dependent mobility and a drain-induced threshold shift), so a perfect fit is impossible
+# by construction and the held-out tests can reveal model-form error.
+synthetic_truth:
+  mobility_gamma: 0.25
+  dibl_v_per_v_um: 0.03       # V_T shift of 30 mV per volt of V_D at L = 1 um, scaling as 1/L
+  parameters: {phi_SD: 4.35, phi_G: 4.30, mu0: 18.0, Q_f: 6.0e12, N_tail: 2.0e19}
+  active_components: [fixed_charge, tail_states]
+  noise:
+    lognormal_sigma: 0.03     # 3 % multiplicative noise
+    floor_noise_A: 2.0e-12    # additive noise floor (below the 10 pA metric floor)
+
+simulator:
+  kind: synthetic             # or: {kind: plugin, entry: "your_pkg.module:YourSimulator", options: {...}}
+
+calibration_model:
+  mobility_gamma: 0.0
+  initial: {phi_SD: 4.75, phi_G: 4.55, mu0: 8.0}   # deliberately poor starting model
+
+parameters:                   # approved bounds (illustrative)
+  phi_SD: {lower: 4.20, upper: 4.80, unit: eV}
+  phi_G:  {lower: 4.20, upper: 4.80, unit: eV}
+  mu0:    {lower: 2.0, upper: 40.0, scale: log, unit: cm2/Vs}
+  Q_f:    {lower: -1.0e13, upper: 1.0e13, unit: cm^-2, component: fixed_charge}
+  N_tail: {lower: 1.0e16, upper: 1.0e20, scale: log, unit: cm^-3 eV^-1, component: tail_states}
+
+groups:
+  contact: [phi_SD]
+  electrostatics: [phi_G]
+  transport: [mu0]
+  fixed_charge: {parameters: [phi_G, Q_f], component: fixed_charge}
+  tail_states: {parameters: [N_tail], component: tail_states}
+
+components:                   # optional model terms the workflow may activate
+  fixed_charge:
+    addresses: vth
+    trigger: railed           # eligible only if the gate work function sits at an approved bound
+    controls: [phi_G]
+    initial: {Q_f: 0.0}
+    description: gate-interface fixed charge Q_f shifting V_T by -q*Q_f/C_ox
+  tail_states:
+    addresses: ss
+    trigger: insensitive      # eligible only if no active parameter group can move the SS residual
+    initial: {N_tail: 1.0e18}
+    description: effective tail-state density raising the subthreshold ideality n
+
+splits:                       # structure follows the paper's Table IV
+  calibration:    {length_um: 1.0, vd: [0.05, 1.0]}
+  heldout_drain:  {length_um: 1.0, vd: [0.1, 0.2, 0.5]}
+  heldout_length: {length_um: 2.0, vd: [0.05, 1.0]}
+
+objective:
+  weights: {log: 0.25, lin: 0.10, vth: 1.00, ion: 0.20, ss: 0.25}      # paper Eq. (1)
+  normalization: {log: 0.1, lin: 0.1, vth: 0.1, ion: 0.1, ss: 0.01}    # a_i, demo choice
+  measurement_floor_A: 1.0e-11                                       # paper: 10 pA
+
+controller:
+  ofat_step: 0.02             # normalized units
+  trust_radius: 0.4           # Delta in Eq. (3), normalized units
+  max_step_halvings: 2
+  max_accepted_updates: 25
+  min_relative_improvement: 0.01
+  stall_patience: 2
+  activation_min_share: 0.15  # a residual term must carry >= 15 % of J to justify a new component
+  insensitivity_ratio: 0.5
+  rail_tolerance: 1.0e-3
+
+review:
+  mode: policy                # or "interactive" (also: --interactive on the CLI)
+  approve_components: [fixed_charge, tail_states]

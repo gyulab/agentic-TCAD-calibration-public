@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this demonstration, please cite the paper that describes the method."
+title: "Agentic TCAD Calibration: Reproducible Open Demo"
+type: software
+version: 0.1.0
+license: MIT
+authors:
+  - family-names: Jeong
+    given-names: Gyujun
+preferred-citation:
+  type: article
+  title: "Agentic TCAD Calibration Workflow for Oxide Semiconductor Transistors"
+  year: 2026
+  doi: 10.48550/arXiv.2609.12184
+  url: "https://arxiv.org/abs/2609.12184"
+  repository: arXiv
+  identifiers:
+    - type: other
+      value: "arXiv:2609.12184"
+  authors:
+    - {family-names: Jeong, given-names: Gyujun}
+    - {family-names: Lee, given-names: Junmo}
+    - {family-names: Cho, given-names: Sungwon}
+    - {family-names: Hwang, given-names: Woohyun}
+    - {family-names: Seo, given-names: Kwangyou}
+    - {family-names: Lim, given-names: Suhwan}
+    - {family-names: Kim, given-names: Wanki}
+    - {family-names: Ha, given-names: Daewon}
+    - {family-names: Ranade, given-names: Rishi}
+    - {family-names: Youn, given-names: Kihang}
+    - {family-names: Cherukuri, given-names: Ram}
+    - {family-names: Wang, given-names: Yiyi}
+    - {family-names: Khan, given-names: Asif}
+    - {family-names: Yu, given-names: Shimeng}
