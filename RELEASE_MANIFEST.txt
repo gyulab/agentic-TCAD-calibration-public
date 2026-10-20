@@ -15,6 +15,10 @@ docs/methodology.md
 docs/paper_vs_demo.md
 docs/private_simulator.md
 docs/reproducibility.md
+examples/planner_runs/claude-opus-5-5/README.md
+examples/planner_runs/claude-opus-5-5/action_log.jsonl
+examples/planner_runs/claude-opus-5-5/decisions.md
+examples/planner_runs/claude-opus-5-5/summary.json
 pyproject.toml
 requirements-lock.txt
 src/agentic_tcad_demo/__init__.py
@@ -24,6 +28,7 @@ src/agentic_tcad_demo/config.py
 src/agentic_tcad_demo/controller.py
 src/agentic_tcad_demo/device.py
 src/agentic_tcad_demo/evaluate.py
+src/agentic_tcad_demo/external.py
 src/agentic_tcad_demo/llm.py
 src/agentic_tcad_demo/log.py
 src/agentic_tcad_demo/metrics.py
@@ -40,6 +45,7 @@ tests/test_acceptance.py
 tests/test_device.py
 tests/test_llm_optional.py
 tests/test_metrics_objective.py
+tests/test_planners.py
 tests/test_release_hygiene.py
 tests/test_sensitivity_update.py
 tests/test_workflow.py

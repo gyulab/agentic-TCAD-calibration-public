@@ -20,7 +20,7 @@ paper's measured-device or Sentaurus results.**
 | Accept only converged updates that reduce J | Enforced by the controller, and every rejection is logged with its reason |
 | Residual-guided physics-model activation | A fixed-charge term and a tail-state term, activated only when a residual persists and, to first order, the existing parameters cannot remove it (or the controlling parameter is pinned at its bound), and only after an approval record |
 | Fixed-model transfer tests | Held-out drain biases (0.1, 0.2, 0.5 V) and a second channel length (2 µm), with no retuning |
-| LLM agent orchestrating tools | Default: a deterministic, inspectable rule-based controller. Optional: an LLM planner using the same tools and rules |
+| LLM agent orchestrating tools | Default: a deterministic, inspectable rule-based controller. Optional: an LLM planner (API or file exchange) using the same tools and rules, plus exact replay of recorded LLM decisions |
 
 The **agent** (controller or LLM) only *chooses* among legal actions. It probes a parameter group,
 requests a model activation, or stops. The numerical step always comes from the Gauss–Newton tool, and
@@ -74,6 +74,24 @@ The two candidate components use the same functional forms as the synthetic trut
 therefore the negative one. If the truth lacks a component, the workflow does not activate it
 (`test_activation_gate_is_selective`).
 
+### LLM planner run: Claude Opus 5.5
+
+The same calibration was also driven by Claude Opus 5.5 working in a Claude Code session. The model
+chose each action through the file-exchange planner, and the controller applied the same rules as for any
+planner. The decisions are recorded and can be replayed exactly without the LLM. Details are in
+[`examples/planner_runs/claude-opus-5-5/`](examples/planner_runs/claude-opus-5-5/).
+
+| Same seed and config | Rule planner | Claude Opus 5.5 planner |
+|---|---|---|
+| J final | 0.407 | 0.391 |
+| Accepted / rejected trials | 17 / 6 | 10 / 1 |
+| Simulator calls (calibration) | 362 | 224 |
+| Held-out max \|ΔV<sub>th</sub>\| (drain bias / L = 2 µm) | 16.9 / 17.0 mV | 14.6 / 12.5 mV |
+
+This is a single run and **not a blind evaluation**. The model that made the decisions also wrote this
+repository and had seen the synthetic truth and the rule planner's trajectory. The run shows that an LLM
+can drive the workflow through the same tools and guard rails. It does not show that an LLM is better.
+
 | | |
 |---|---|
 | ![initial](docs/figures/fig1_initial_vs_target.png) | ![final](docs/figures/fig2_final_vs_target.png) |
@@ -117,6 +135,10 @@ accuracy. The value here is the inspectable workflow, its guard rails, and its t
   `AGENTIC_TCAD_LLM_API_KEY` (see `.env.example`), then run with `--planner llm`. The planner works with
   any OpenAI-compatible endpoint, hosted or local. The LLM may only choose legal actions. Invalid output
   is logged as a planner error. The run never silently falls back to the rule planner.
+- **Any external agent or a person as planner.** `--planner external --exchange-dir DIR --planner-name NAME`
+  writes each observation to `DIR/obs_NNN.json` and waits for a JSON action in `DIR/act_NNN.json`.
+  `--planner replay --replay-log action_log.jsonl` re-issues recorded decisions, so an LLM run can be
+  reproduced without the LLM. A replay is labelled `replay(...)` in all outputs.
 - **Your own simulator.** Implement the small `Simulator` interface and point the config at it. See
   [`docs/private_simulator.md`](docs/private_simulator.md). Keep any proprietary adapter, deck, or
   license configuration outside this repository.

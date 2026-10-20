@@ -39,6 +39,18 @@ class LLMConfigError(RuntimeError):
     pass
 
 
+def parse_action(text: str) -> Action:
+    """Parse one JSON action. Raises ValueError for anything outside the action schema."""
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.strip("`").split("\n", 1)[-1].rsplit("```", 1)[0]
+    data = json.loads(text)
+    action, target = data["action"], data.get("target")
+    if action not in ACTION_SCHEMA or not (target is None or isinstance(target, str)):
+        raise ValueError(f"unexpected action/target: {action!r} / {target!r}")
+    return Action(action, target, str(data.get("rationale", "")))
+
+
 def http_post_json(url: str, payload: dict, headers: dict, timeout: float) -> dict:
     req = urllib.request.Request(url, data=json.dumps(payload).encode(), headers=headers, method="POST")
     with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310 (user-configured URL)
@@ -71,13 +83,6 @@ class LLMPlanner:
                                 {"role": "user", "content": json.dumps(observation, default=float)}]}
         try:
             reply = self.transport(f"{self.base_url}/chat/completions", payload, headers, self.timeout)
-            text = reply["choices"][0]["message"]["content"].strip()
-            if text.startswith("```"):
-                text = text.strip("`").split("\n", 1)[-1].rsplit("```", 1)[0]
-            data = json.loads(text)
-            action, target = data["action"], data.get("target")
-            if action not in ACTION_SCHEMA or not (target is None or isinstance(target, str)):
-                raise ValueError(f"unexpected action/target: {action!r} / {target!r}")
-            return Action(action, target, str(data.get("rationale", "")))
+            return parse_action(reply["choices"][0]["message"]["content"])
         except Exception as exc:  # malformed output or transport error: surfaced as an illegal action
             return Action("invalid", None, f"LLM output could not be used: {type(exc).__name__}: {exc}")

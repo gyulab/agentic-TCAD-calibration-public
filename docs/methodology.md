@@ -149,6 +149,13 @@ values, because steps always come from Eq. (3). These answers count as planner e
 
 Three planner errors stop the run. There is no fallback to the rule planner.
 
+**External and replay planners.** The external planner exchanges the same observation and action JSON
+through files (`obs_NNN.json`, `act_NNN.json`). It lets any agent or person act as the planner without an
+API endpoint, under the same parser and controller rules. The replay planner re-issues the decisions
+recorded in an action log and checks that each one belongs to the same cycle. This makes a recorded LLM
+run reproducible without the LLM. The recorded Claude Opus 5.5 run is in
+`examples/planner_runs/claude-opus-5-5/`. It is a single, non-blind run (see the caveats there).
+
 ## 5. Evaluation (`evaluate.py`)
 
 The final parameters are frozen and hashed. Only simulation and scoring tools are used, and tests assert

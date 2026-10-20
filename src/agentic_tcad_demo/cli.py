@@ -19,8 +19,13 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--config", default="configs/synthetic_demo.yaml")
     run.add_argument("--out", default="outputs/demo", help="output directory (log, summary, figures)")
     run.add_argument("--figures-dir", default=None, help="where to write PNGs (default: <out>/figures)")
-    run.add_argument("--planner", choices=("rule", "llm"), default="rule",
-                     help="rule = deterministic offline controller (default); llm = optional LLM planner")
+    run.add_argument("--planner", choices=("rule", "llm", "external", "replay"), default="rule",
+                     help="rule = deterministic offline controller (default); llm = OpenAI-compatible LLM; "
+                          "external = decisions written to files by another agent or a person; "
+                          "replay = re-issue the decisions recorded in an action log")
+    run.add_argument("--exchange-dir", default="outputs/exchange", help="file exchange for --planner external")
+    run.add_argument("--planner-name", default="unnamed", help="who answers for --planner external (recorded)")
+    run.add_argument("--replay-log", help="action_log.jsonl to replay for --planner replay")
     run.add_argument("--interactive", action="store_true", help="ask on the terminal before each model activation")
     run.add_argument("--no-figures", action="store_true")
     args = parser.parse_args(argv)
@@ -33,6 +38,15 @@ def main(argv: list[str] | None = None) -> int:
         except LLMConfigError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
+    elif args.planner == "external":
+        from .external import ExternalPlanner
+        planner = ExternalPlanner(Path(args.exchange_dir), args.planner_name)
+    elif args.planner == "replay":
+        from .external import ReplayPlanner
+        if not args.replay_log:
+            print("error: --planner replay needs --replay-log", file=sys.stderr)
+            return 2
+        planner = ReplayPlanner(Path(args.replay_log))
     else:
         planner = RulePlanner()
     reviewer = Reviewer("interactive" if args.interactive else cfg.review_mode, cfg.approved_components)

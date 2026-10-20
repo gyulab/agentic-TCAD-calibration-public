@@ -1,0 +1,457 @@
+{
+  "J_final": 0.391151,
+  "J_history": [
+    20.7749,
+    15.9343,
+    13.8383,
+    11.4012,
+    4.44405,
+    3.36648,
+    1.8605,
+    1.23693,
+    1.13995,
+    0.403854,
+    0.391151
+  ],
+  "J_initial": 20.7749,
+  "J_reduction_factor": 53.1123,
+  "accepted_updates": [
+    {
+      "J_after": 15.9343,
+      "activation": null,
+      "changes": {
+        "phi_G": {
+          "from": 4.55,
+          "to": 4.31
+        }
+      },
+      "group": "electrostatics"
+    },
+    {
+      "J_after": 13.8383,
+      "activation": null,
+      "changes": {
+        "phi_SD": {
+          "from": 4.75,
+          "to": 4.51
+        }
+      },
+      "group": "contact"
+    },
+    {
+      "J_after": 11.4012,
+      "activation": null,
+      "changes": {
+        "phi_G": {
+          "from": 4.31,
+          "to": 4.2
+        }
+      },
+      "group": "electrostatics"
+    },
+    {
+      "J_after": 4.44405,
+      "activation": "fixed_charge",
+      "changes": {
+        "Q_f": {
+          "from": 0.0,
+          "to": 6784420000000.0
+        },
+        "phi_G": {
+          "from": 4.2,
+          "to": 4.32718
+        }
+      },
+      "group": "fixed_charge"
+    },
+    {
+      "J_after": 3.36648,
+      "activation": null,
+      "changes": {
+        "phi_SD": {
+          "from": 4.51,
+          "to": 4.27
+        }
+      },
+      "group": "contact"
+    },
+    {
+      "J_after": 1.8605,
+      "activation": null,
+      "changes": {
+        "mu0": {
+          "from": 8.0,
+          "to": 19.8936
+        }
+      },
+      "group": "transport"
+    },
+    {
+      "J_after": 1.23693,
+      "activation": "tail_states",
+      "changes": {
+        "N_tail": {
+          "from": 1e+18,
+          "to": 6.30957e+18
+        }
+      },
+      "group": "tail_states"
+    },
+    {
+      "J_after": 1.13995,
+      "activation": null,
+      "changes": {
+        "N_tail": {
+          "from": 6.30957e+18,
+          "to": 3.03168e+19
+        }
+      },
+      "group": "tail_states"
+    },
+    {
+      "J_after": 0.403854,
+      "activation": null,
+      "changes": {
+        "N_tail": {
+          "from": 3.03168e+19,
+          "to": 2.07951e+19
+        }
+      },
+      "group": "tail_states"
+    },
+    {
+      "J_after": 0.391151,
+      "activation": null,
+      "changes": {
+        "phi_G": {
+          "from": 4.32718,
+          "to": 4.34001
+        }
+      },
+      "group": "electrostatics"
+    }
+  ],
+  "activations": [
+    "fixed_charge",
+    "tail_states"
+  ],
+  "description": "Synthetic-data demonstration; numbers are NOT the paper's results.",
+  "environment": {
+    "numpy": "2.4.6",
+    "python": "3.11.17",
+    "scipy": "1.17.1"
+  },
+  "evaluation": {
+    "calibration": {
+      "final": {
+        "max_abs_dVth_mV": 14.6915,
+        "max_abs_dlogIon_dec": 0.0174186,
+        "mean_abs_dVth_mV": 14.3498,
+        "mean_abs_dlogIon_dec": 0.0153431,
+        "n": 2
+      },
+      "initial": {
+        "max_abs_dVth_mV": 719.895,
+        "max_abs_dlogIon_dec": 1.4586,
+        "mean_abs_dVth_mV": 707.812,
+        "mean_abs_dlogIon_dec": 1.44056,
+        "n": 2
+      }
+    },
+    "heldout_drain": {
+      "final": {
+        "max_abs_dVth_mV": 14.5663,
+        "max_abs_dlogIon_dec": 0.0270463,
+        "mean_abs_dVth_mV": 8.6343,
+        "mean_abs_dlogIon_dec": 0.0159322,
+        "n": 3
+      },
+      "initial": {
+        "max_abs_dVth_mV": 705.662,
+        "max_abs_dlogIon_dec": 1.45475,
+        "mean_abs_dVth_mV": 697.145,
+        "mean_abs_dlogIon_dec": 1.44668,
+        "n": 3
+      }
+    },
+    "heldout_length": {
+      "final": {
+        "max_abs_dVth_mV": 12.5428,
+        "max_abs_dlogIon_dec": 0.040281,
+        "mean_abs_dVth_mV": 6.66989,
+        "mean_abs_dlogIon_dec": 0.0327191,
+        "n": 2
+      },
+      "initial": {
+        "max_abs_dVth_mV": 699.293,
+        "max_abs_dlogIon_dec": 1.31792,
+        "mean_abs_dVth_mV": 698.14,
+        "mean_abs_dlogIon_dec": 1.28496,
+        "n": 2
+      }
+    }
+  },
+  "evaluation_rows": {
+    "calibration": {
+      "final": [
+        {
+          "J_condition": 0.392642,
+          "condition": "L=1um,VD=0.05V",
+          "converged": true,
+          "dSS_mV_per_dec": 0.601155,
+          "dVth_mV": -14.008,
+          "dlogIon_dec": 0.0174186,
+          "length_um": 1.0,
+          "vd": 0.05
+        },
+        {
+          "J_condition": 0.38966,
+          "condition": "L=1um,VD=1V",
+          "converged": true,
+          "dSS_mV_per_dec": 1.64127,
+          "dVth_mV": 14.6915,
+          "dlogIon_dec": -0.0132676,
+          "length_um": 1.0,
+          "vd": 1.0
+        }
+      ],
+      "initial": [
+        {
+          "J_condition": 20.4389,
+          "condition": "L=1um,VD=0.05V",
+          "converged": true,
+          "dSS_mV_per_dec": -21.4786,
+          "dVth_mV": 695.729,
+          "dlogIon_dec": -1.4586,
+          "length_um": 1.0,
+          "vd": 0.05
+        },
+        {
+          "J_condition": 21.1109,
+          "condition": "L=1um,VD=1V",
+          "converged": true,
+          "dSS_mV_per_dec": -22.5557,
+          "dVth_mV": 719.895,
+          "dlogIon_dec": -1.42253,
+          "length_um": 1.0,
+          "vd": 1.0
+        }
+      ]
+    },
+    "heldout_drain": {
+      "final": [
+        {
+          "J_condition": 0.409368,
+          "condition": "L=1um,VD=0.1V",
+          "converged": true,
+          "dSS_mV_per_dec": -0.59614,
+          "dVth_mV": -14.5663,
+          "dlogIon_dec": 0.0270463,
+          "length_um": 1.0,
+          "vd": 0.1
+        },
+        {
+          "J_condition": 0.293692,
+          "condition": "L=1um,VD=0.2V",
+          "converged": true,
+          "dSS_mV_per_dec": -0.0305268,
+          "dVth_mV": -10.8779,
+          "dlogIon_dec": 0.0123504,
+          "length_um": 1.0,
+          "vd": 0.2
+        },
+        {
+          "J_condition": 0.12972,
+          "condition": "L=1um,VD=0.5V",
+          "converged": true,
+          "dSS_mV_per_dec": 0.969868,
+          "dVth_mV": 0.458717,
+          "dlogIon_dec": 0.00839986,
+          "length_um": 1.0,
+          "vd": 0.5
+        }
+      ],
+      "initial": [
+        {
+          "J_condition": 20.6267,
+          "condition": "L=1um,VD=0.1V",
+          "converged": true,
+          "dSS_mV_per_dec": -24.4487,
+          "dVth_mV": 691.425,
+          "dlogIon_dec": -1.44605,
+          "length_um": 1.0,
+          "vd": 0.1
+        },
+        {
+          "J_condition": 20.7717,
+          "condition": "L=1um,VD=0.2V",
+          "converged": true,
+          "dSS_mV_per_dec": -24.2187,
+          "dVth_mV": 694.347,
+          "dlogIon_dec": -1.45475,
+          "length_um": 1.0,
+          "vd": 0.2
+        },
+        {
+          "J_condition": 20.9392,
+          "condition": "L=1um,VD=0.5V",
+          "converged": true,
+          "dSS_mV_per_dec": -23.2271,
+          "dVth_mV": 705.662,
+          "dlogIon_dec": -1.43925,
+          "length_um": 1.0,
+          "vd": 0.5
+        }
+      ]
+    },
+    "heldout_length": {
+      "final": [
+        {
+          "J_condition": 0.387552,
+          "condition": "L=2um,VD=0.05V",
+          "converged": true,
+          "dSS_mV_per_dec": 1.15382,
+          "dVth_mV": -12.5428,
+          "dlogIon_dec": -0.0251572,
+          "length_um": 2.0,
+          "vd": 0.05
+        },
+        {
+          "J_condition": 0.240833,
+          "condition": "L=2um,VD=1V",
+          "converged": true,
+          "dSS_mV_per_dec": 0.514104,
+          "dVth_mV": -0.797005,
+          "dlogIon_dec": -0.040281,
+          "length_um": 2.0,
+          "vd": 1.0
+        }
+      ],
+      "initial": [
+        {
+          "J_condition": 19.7601,
+          "condition": "L=2um,VD=0.05V",
+          "converged": true,
+          "dSS_mV_per_dec": -18.2753,
+          "dVth_mV": 696.988,
+          "dlogIon_dec": -1.31792,
+          "length_um": 2.0,
+          "vd": 0.05
+        },
+        {
+          "J_condition": 20.1423,
+          "condition": "L=2um,VD=1V",
+          "converged": true,
+          "dSS_mV_per_dec": -22.6596,
+          "dVth_mV": 699.293,
+          "dlogIon_dec": -1.252,
+          "length_um": 2.0,
+          "vd": 1.0
+        }
+      ]
+    }
+  },
+  "final_active_components": [
+    "fixed_charge",
+    "tail_states"
+  ],
+  "final_params": {
+    "N_tail": 2.07951e+19,
+    "Q_f": 6784420000000.0,
+    "mu0": 19.8936,
+    "phi_G": 4.34001,
+    "phi_SD": 4.27
+  },
+  "final_params_hash": "903fcf6bdcdf205a",
+  "n_simulations_calibration": 224,
+  "planner": "external(claude-opus-5-5 via Claude Code session)",
+  "rejected_trials": 1,
+  "seed": 2609,
+  "stop_reason": "planner stop: All predicted gains are <=0.006 (under 2% of J). The remaining V_th and log-current errors look like model-form error (drain-dependent V_th, gate-dependent mobility) that no available parameter or component represents; further updates would fit noise or drift along the phi_G/Q_f null space.",
+  "terms_history": [
+    {
+      "ion": 2.88113,
+      "lin": 0.607682,
+      "log": 9.65756,
+      "ss": 0.55043,
+      "vth": 7.07812
+    },
+    {
+      "ion": 2.87388,
+      "lin": 0.605761,
+      "log": 7.22611,
+      "ss": 0.55043,
+      "vth": 4.67812
+    },
+    {
+      "ion": 1.2779,
+      "lin": 0.483642,
+      "log": 6.85563,
+      "ss": 0.58721,
+      "vth": 4.63395
+    },
+    {
+      "ion": 1.25989,
+      "lin": 0.475411,
+      "log": 5.54468,
+      "ss": 0.586651,
+      "vth": 3.5346
+    },
+    {
+      "ion": 1.21686,
+      "lin": 0.455671,
+      "log": 1.67527,
+      "ss": 0.586852,
+      "vth": 0.509396
+    },
+    {
+      "ion": 0.558006,
+      "lin": 0.304608,
+      "log": 1.40829,
+      "ss": 0.590236,
+      "vth": 0.505332
+    },
+    {
+      "ion": 0.0281382,
+      "lin": 0.0592877,
+      "log": 0.934968,
+      "ss": 0.682475,
+      "vth": 0.15563
+    },
+    {
+      "ion": 0.0220594,
+      "lin": 0.0489039,
+      "log": 0.547054,
+      "ss": 0.466446,
+      "vth": 0.152471
+    },
+    {
+      "ion": 0.0401186,
+      "lin": 0.0489376,
+      "log": 0.442022,
+      "ss": 0.35236,
+      "vth": 0.256516
+    },
+    {
+      "ion": 0.0301263,
+      "lin": 0.038379,
+      "log": 0.163086,
+      "ss": 0.0278542,
+      "vth": 0.144408
+    },
+    {
+      "ion": 0.0306862,
+      "lin": 0.0379204,
+      "log": 0.151016,
+      "ss": 0.0280304,
+      "vth": 0.143498
+    }
+  ],
+  "truth_params_for_reference": {
+    "N_tail": 2e+19,
+    "Q_f": 6000000000000.0,
+    "mu0": 18.0,
+    "phi_G": 4.3,
+    "phi_SD": 4.35
+  }
+}

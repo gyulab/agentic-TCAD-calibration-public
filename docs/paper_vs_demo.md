@@ -28,7 +28,7 @@ public. This repository cannot reproduce them and does not try to.
 | The paper's 14.3× reduction or its transfer errors | **No** | different data, solver, and J normalization |
 | In–W–O device physics or the paper's parameter values | **No** | illustrative analytic model |
 | Equivalence to Sentaurus | **No** | no device-equation solver |
-| Behaviour of GPT-5.5 / Codex | **No** | the default planner is rule-based; the optional LLM planner is untested against any specific model |
+| Behaviour of GPT-5.5 / Codex | **No** | the default planner is rule-based. One recorded, non-blind run with Claude Opus 5.5 as planner shows that an LLM can drive the same tools (`examples/planner_runs/`). It is not an evaluation of any model |
 
 ## Specified by the paper vs. chosen here
 
