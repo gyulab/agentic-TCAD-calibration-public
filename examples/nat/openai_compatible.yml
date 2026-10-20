@@ -1,0 +1,21 @@
+# Live run with any OpenAI-compatible endpoint (OpenAI, vLLM, Ollama, ...). Set OPENAI_API_KEY if needed
+# and edit base_url / model_name. Record the model in planner_label so the action log names it.
+functions:
+  tcad_observe: {_type: tcad_observe, out_dir: outputs/nat_openai, planner_label: "react_agent/openai-compatible/MODEL"}
+  tcad_update_group: {_type: tcad_update_group, out_dir: outputs/nat_openai, planner_label: "react_agent/openai-compatible/MODEL"}
+  tcad_activate_component: {_type: tcad_activate_component, out_dir: outputs/nat_openai, planner_label: "react_agent/openai-compatible/MODEL"}
+  tcad_stop: {_type: tcad_stop, out_dir: outputs/nat_openai, planner_label: "react_agent/openai-compatible/MODEL"}
+
+llms:
+  llm:
+    _type: openai
+    model_name: MODEL
+    base_url: http://localhost:8000/v1
+    temperature: 0.0
+
+workflow:
+  _type: react_agent
+  llm_name: llm
+  tool_names: [tcad_observe, tcad_update_group, tcad_activate_component, tcad_stop]
+  max_tool_calls: 60
+  max_history: 40

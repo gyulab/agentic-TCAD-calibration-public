@@ -17,3 +17,16 @@ jobs:
       - run: pytest
       - run: python -m agentic_tcad_demo run --config configs/synthetic_demo.yaml --out outputs/ci
       - run: python tools/release_audit.py --history
+
+  nat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements-nat-lock.txt && pip install -e . --no-deps
+      - run: nat info components -t function | grep tcad_observe
+      - run: pytest tests/test_nat_plugin.py tests/test_session.py tests/test_skill.py
+      - run: nat run --config_file examples/nat/offline_mock.yml --input "Calibrate the synthetic TFT."
+      - run: python -m agentic_tcad_demo run --planner replay --replay-log outputs/nat_offline/action_log.jsonl --out outputs/nat_replay --no-figures

@@ -29,8 +29,8 @@ def all_conditions(cfg: DemoConfig):
 
 
 def run_demo(cfg: DemoConfig, out_dir: Path | None, planner: Planner | None = None,
-             reviewer: Reviewer | None = None) -> dict:
-    log = ActionLog(None if out_dir is None else out_dir / "action_log.jsonl")
+             reviewer: Reviewer | None = None, log: ActionLog | None = None) -> dict:
+    log = log or ActionLog(None if out_dir is None else out_dir / "action_log.jsonl")
     conds = all_conditions(cfg)
     measured = synthesize_measurement(cfg.truth, cfg.truth_params, cfg.truth_active, conds, cfg.vg,
                                       cfg.seed, cfg.noise["lognormal_sigma"], cfg.noise["floor_noise_A"])

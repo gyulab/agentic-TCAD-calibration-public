@@ -1,0 +1,30 @@
+# Offline check of the NeMo Agent Toolkit integration. No network, no API key.
+# The LLM is a scripted offline model (tcad_scripted_llm, registered by this plugin). It replies with
+# the ReAct steps below in order, so this file exercises the full NAT path
+# (react_agent -> tools -> controller) deterministically. It does NOT show any LLM reasoning.
+#
+#   nat run --config_file examples/nat/offline_mock.yml --input "Calibrate the synthetic TFT."
+functions:
+  tcad_observe: {_type: tcad_observe, out_dir: outputs/nat_offline, planner_label: "react_agent/tcad_scripted_llm"}
+  tcad_update_group: {_type: tcad_update_group, out_dir: outputs/nat_offline, planner_label: "react_agent/tcad_scripted_llm"}
+  tcad_activate_component: {_type: tcad_activate_component, out_dir: outputs/nat_offline, planner_label: "react_agent/tcad_scripted_llm"}
+  tcad_stop: {_type: tcad_stop, out_dir: outputs/nat_offline, planner_label: "react_agent/tcad_scripted_llm"}
+
+llms:
+  scripted:
+    _type: tcad_scripted_llm
+    responses:
+      - "Thought: I need the current state.\nAction: tcad_observe\nAction Input: None"
+      - "Thought: The curve is shifted by a large V_th offset.\nAction: tcad_update_group\nAction Input: {\"group\": \"electrostatics\", \"rationale\": \"rigid V_th offset dominates the log-current error\"}"
+      - "Thought: On-current is still low and the contact barrier is high.\nAction: tcad_update_group\nAction Input: {\"group\": \"contact\", \"rationale\": \"contact-limited on-current\"}"
+      - "Thought: Use the remaining gate work-function range.\nAction: tcad_update_group\nAction Input: {\"group\": \"electrostatics\", \"rationale\": \"remaining V_th offset\"}"
+      - "Thought: phi_G is at its bound and an offset remains.\nAction: tcad_activate_component\nAction Input: {\"component\": \"fixed_charge\", \"rationale\": \"V_th offset persists with phi_G railed\"}"
+      - "Thought: Done for this check.\nAction: tcad_stop\nAction Input: {\"rationale\": \"offline integration check complete\"}"
+      - "Thought: I now know the final answer\nFinal Answer: calibration stopped; see outputs/nat_offline"
+
+workflow:
+  _type: react_agent
+  llm_name: scripted
+  tool_names: [tcad_observe, tcad_update_group, tcad_activate_component, tcad_stop]
+  max_tool_calls: 60
+  verbose: false

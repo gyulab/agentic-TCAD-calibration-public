@@ -4,6 +4,7 @@
 - Python ≥ 3.10. The reference runs used Python 3.11.
 - Exact versions are pinned in `requirements-lock.txt`: numpy, scipy, matplotlib, PyYAML, pytest, and their dependencies.
 - No GPU, no commercial simulator, no network access, and no API key are needed for the default path.
+- The optional NVIDIA NeMo Agent Toolkit integration is pinned separately in `requirements-nat-lock.txt` (Python 3.11, `nvidia-nat` 1.9.0). See `docs/nat_and_skills.md`.
 - If you have packages in a per-user site directory, run with `PYTHONNOUSERSITE=1`. This keeps them from shadowing the pinned ones.
 
 ## Determinism

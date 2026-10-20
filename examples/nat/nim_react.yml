@@ -1,0 +1,24 @@
+# Live run with an LLM served by NVIDIA NIM (build.nvidia.com or a local NIM). Requires NVIDIA_API_KEY.
+#   export NVIDIA_API_KEY=...
+#   nat run --config_file examples/nat/nim_react.yml --input "$(cat examples/nat/task.md)"
+# Then reproduce the run without the LLM:
+#   python -m agentic_tcad_demo run --planner replay --replay-log outputs/nat_nim/action_log.jsonl
+functions:
+  tcad_observe: {_type: tcad_observe, out_dir: outputs/nat_nim, planner_label: "react_agent/nim/meta/llama-3.3-70b-instruct"}
+  tcad_update_group: {_type: tcad_update_group, out_dir: outputs/nat_nim, planner_label: "react_agent/nim/meta/llama-3.3-70b-instruct"}
+  tcad_activate_component: {_type: tcad_activate_component, out_dir: outputs/nat_nim, planner_label: "react_agent/nim/meta/llama-3.3-70b-instruct"}
+  tcad_stop: {_type: tcad_stop, out_dir: outputs/nat_nim, planner_label: "react_agent/nim/meta/llama-3.3-70b-instruct"}
+
+llms:
+  nim_llm:
+    _type: nim
+    model_name: meta/llama-3.3-70b-instruct
+    temperature: 0.0
+
+workflow:
+  _type: react_agent
+  llm_name: nim_llm
+  tool_names: [tcad_observe, tcad_update_group, tcad_activate_component, tcad_stop]
+  max_tool_calls: 60
+  max_history: 40
+  verbose: true

@@ -20,7 +20,7 @@ paper's measured-device or Sentaurus results.**
 | Accept only converged updates that reduce J | Enforced by the controller, and every rejection is logged with its reason |
 | Residual-guided physics-model activation | A fixed-charge term and a tail-state term, activated only when a residual persists and, to first order, the existing parameters cannot remove it (or the controlling parameter is pinned at its bound), and only after an approval record |
 | Fixed-model transfer tests | Held-out drain biases (0.1, 0.2, 0.5 V) and a second channel length (2 µm), with no retuning |
-| LLM agent orchestrating tools | Default: a deterministic, inspectable rule-based controller. Optional: an LLM planner (API or file exchange) using the same tools and rules, plus exact replay of recorded LLM decisions |
+| LLM agent orchestrating tools | Default: a deterministic, inspectable rule-based controller. Optional: an LLM planner (API or file exchange), a NVIDIA NeMo Agent Toolkit plugin and an Agent Skill, all using the same tools and rules, plus exact replay of recorded LLM decisions |
 
 The **agent** (controller or LLM) only *chooses* among legal actions. It probes a parameter group,
 requests a model activation, or stops. The numerical step always comes from the Gauss–Newton tool, and
@@ -135,6 +135,14 @@ accuracy. The value here is the inspectable workflow, its guard rails, and its t
   `AGENTIC_TCAD_LLM_API_KEY` (see `.env.example`), then run with `--planner llm`. The planner works with
   any OpenAI-compatible endpoint, hosted or local. The LLM may only choose legal actions. Invalid output
   is logged as a planner error. The run never silently falls back to the rule planner.
+- **NVIDIA NeMo Agent Toolkit and Agent Skills.** `pip install -e ".[nat]"` (Python 3.11–3.13) registers
+  the calibration tools as NAT functions. Then run, for example:
+  - `nat run --config_file examples/nat/offline_mock.yml --input "Calibrate the synthetic TFT."` (offline)
+  - `examples/nat/nim_react.yml` with an NVIDIA NIM model
+
+  `npx skills add gyulab/agentic-TCAD-calibration-public --skill agentic-tcad-calibration` installs the
+  Agent Skill for Codex or Claude Code. Install commands, paths, tested versions and limitations are in
+  [`docs/nat_and_skills.md`](docs/nat_and_skills.md).
 - **Any external agent or a person as planner.** `--planner external --exchange-dir DIR --planner-name NAME`
   writes each observation to `DIR/obs_NNN.json` and waits for a JSON action in `DIR/act_NNN.json`.
   `--planner replay --replay-log action_log.jsonl` re-issues recorded decisions, so an LLM run can be
