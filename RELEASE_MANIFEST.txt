@@ -11,6 +11,9 @@ docs/figures/fig2_final_vs_target.png
 docs/figures/fig3_objective_trajectory.png
 docs/figures/fig4_residual_components.png
 docs/figures/fig5_heldout_evaluation.png
+docs/media/agentic_tcad_calibration.gif
+docs/media/agentic_tcad_calibration.mp4
+docs/media/agentic_tcad_calibration_poster.png
 docs/methodology.md
 docs/nat_and_skills.md
 docs/paper_vs_demo.md
@@ -31,6 +34,7 @@ skills/agentic-tcad-calibration/SKILL.md
 skills/agentic-tcad-calibration/references/decision-rules.md
 src/agentic_tcad_demo/__init__.py
 src/agentic_tcad_demo/__main__.py
+src/agentic_tcad_demo/animate.py
 src/agentic_tcad_demo/cli.py
 src/agentic_tcad_demo/config.py
 src/agentic_tcad_demo/controller.py
@@ -52,6 +56,7 @@ src/agentic_tcad_demo/update.py
 tests/__init__.py
 tests/conftest.py
 tests/test_acceptance.py
+tests/test_animate.py
 tests/test_device.py
 tests/test_llm_optional.py
 tests/test_metrics_objective.py

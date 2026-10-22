@@ -28,7 +28,26 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--replay-log", help="action_log.jsonl to replay for --planner replay")
     run.add_argument("--interactive", action="store_true", help="ask on the terminal before each model activation")
     run.add_argument("--no-figures", action="store_true")
+    anim = sub.add_parser("animate", help="render a recorded run (action_log.jsonl) as MP4 and GIF")
+    anim.add_argument("--config", default="configs/synthetic_demo.yaml")
+    anim.add_argument("--log", default="examples/planner_runs/claude-opus-5-5/action_log.jsonl")
+    anim.add_argument("--out", default="docs/media")
+    anim.add_argument("--name", default="agentic_tcad_calibration")
+    anim.add_argument("--title", default="Agentic TCAD calibration of an oxide-semiconductor TFT")
+    anim.add_argument("--agent-note", default="Agent: LLM (Claude Opus 5.5) · simulator: open compact model, synthetic device data")
+    anim.add_argument("--qr-url", default="https://gyulab.github.io/blog/2026/agentic-workflow-tcad/")
+    anim.add_argument("--no-gif", action="store_true")
     args = parser.parse_args(argv)
+
+    if args.command == "animate":
+        from .animate import render
+        out = render(load_config(args.config), Path(args.log), Path(args.out), args.name, args.title,
+                     ["Paper: arXiv:2609.12184", "Code: github.com/gyulab/agentic-TCAD-calibration-public",
+                      "Blog: gyulab.github.io/blog/2026/agentic-workflow-tcad"], args.agent_note, gif=not args.no_gif,
+                     qr_url=args.qr_url)
+        for k, v in out.items():
+            print(f"{k:<8}: {v}")
+        return 0
 
     cfg = load_config(args.config)
     if args.planner == "llm":

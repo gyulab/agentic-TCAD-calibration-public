@@ -21,6 +21,8 @@ dependencies = [
 dev = ["pytest>=8,<10"]
 # NVIDIA NeMo Agent Toolkit integration (Python 3.11-3.13). Pinned to the version tested here.
 nat = ["nvidia-nat[langchain]==1.9.0; python_version >= '3.11'"]
+# Video/GIF rendering of a run (python -m agentic_tcad_demo animate)
+media = ["imageio-ffmpeg>=0.5,<1", "qrcode>=7,<9"]
 
 [project.entry-points."nat.plugins"]
 agentic_tcad = "agentic_tcad_demo.nat_plugin"

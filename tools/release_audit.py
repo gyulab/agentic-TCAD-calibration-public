@@ -18,7 +18,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_EMAILS = {"kyur1ter1a@gmail.com"}
-BINARY_ALLOW = re.compile(r"^docs/figures/[\w\-]+\.png$")
+BINARY_ALLOW = re.compile(r"^docs/(figures/[\w\-]+\.png|media/[\w\-]+\.(png|gif|mp4))$")
+MEDIA = re.compile(r"^docs/media/[\w\-]+\.(png|gif|mp4)$")
+MAX_MEDIA_BYTES = 10_000_000  # GitHub's inline limit for uploaded media on free plans
 FORBIDDEN_SUFFIXES = {".cmd", ".par", ".tdr", ".plt", ".grd", ".sav", ".dat", ".so", ".linux64", ".log",
                       ".csv", ".xlsx", ".xls", ".npz", ".pkl", ".pt", ".ckpt", ".env", ".pem", ".key"}
 MAX_BYTES = 1_000_000
@@ -83,11 +85,12 @@ def scan(files: dict[str, bytes], deny: list[str]) -> list[str]:
         suffix = Path(path).suffix.lower()
         if suffix in FORBIDDEN_SUFFIXES or Path(path).name.startswith(".env") and path != ".env.example":
             findings.append(f"{name}: forbidden file type")
-        if len(data) > MAX_BYTES:
-            findings.append(f"{name}: larger than {MAX_BYTES} bytes")
+        limit = MAX_MEDIA_BYTES if MEDIA.match(path) else MAX_BYTES
+        if len(data) > limit:
+            findings.append(f"{name}: larger than {limit} bytes")
         if b"\0" in data[:8192]:
             if not BINARY_ALLOW.match(path):
-                findings.append(f"{name}: binary file outside docs/figures/")
+                findings.append(f"{name}: binary file outside docs/figures/ and docs/media/")
             if b"tEXt" in data or b"iTXt" in data:
                 findings.append(f"{name}: PNG carries text metadata")
             continue

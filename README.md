@@ -10,6 +10,13 @@ paper's measured-device or Sentaurus results.**
 > arXiv:2609.12184 (v2), 2026. <https://arxiv.org/abs/2609.12184> · DOI
 > [10.48550/arXiv.2609.12184](https://doi.org/10.48550/arXiv.2609.12184)
 
+![Agentic TCAD calibration: decision trace](docs/media/agentic_tcad_calibration.gif)
+
+*One calibration run, step by step: the I<sub>D</sub>–V<sub>G</sub> fit, the V<sub>th</sub>/SS/I<sub>on</sub> errors,
+the TCAD descriptors inside their allowed ranges, the agent's action and reason, and the held-out test.
+Full-resolution video: [`docs/media/agentic_tcad_calibration.mp4`](docs/media/agentic_tcad_calibration.mp4).
+Rebuild it with `pip install -e ".[media]"` and `python -m agentic_tcad_demo animate`.*
+
 ## What the demo shows
 
 | Concept from the paper | What runs here |
