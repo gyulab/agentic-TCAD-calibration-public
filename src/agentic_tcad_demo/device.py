@@ -18,7 +18,7 @@ Physics included (all phenomenological):
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Mapping, Protocol
 
 import numpy as np
@@ -30,14 +30,20 @@ KB_T_Q_300K = 0.025852  # V
 
 @dataclass(frozen=True)
 class Condition:
-    """One measured/simulated transfer curve: drain bias and channel length."""
+    """One measured/simulated transfer curve: drain bias and channel length.
+
+    A gate-dielectric thickness split also sets t_ox_nm. None means the nominal device, so every existing
+    condition is unchanged. Only simulators with `supports_thickness_splits = True` are given such a condition.
+    """
 
     vd: float  # V
     length_um: float  # um
+    t_ox_nm: float | None = None
 
     @property
     def label(self) -> str:
-        return f"L={self.length_um:g}um,VD={self.vd:g}V"
+        text = f"L={self.length_um:g}um,VD={self.vd:g}V"
+        return text if self.t_ox_nm is None else f"{text},tox={self.t_ox_nm:g}nm"
 
 
 @dataclass
@@ -101,6 +107,7 @@ class CompactTFT:
     dibl_v_per_v_um: float = 0.0
     bisection_iters: int = 60
     rel_tol: float = 1e-6
+    supports_thickness_splits = True  # class attribute, not a field: Condition.t_ox_nm is honoured
 
     def threshold_voltage(self, params: Mapping[str, float], active: frozenset[str]) -> float:
         c = self.const
@@ -141,9 +148,24 @@ class CompactTFT:
         """Numerical-recovery variant (more solver iterations), tried once after a failure."""
         return CompactTFT(self.const, self.mobility_gamma, self.dibl_v_per_v_um, 2 * self.bisection_iters, self.rel_tol)
 
+    def for_condition(self, cond: Condition) -> "CompactTFT":
+        """The same device with the gate-dielectric thickness of a thickness-split condition.
+
+        Q_f and the interface-trap capacitance C_it are interface properties and do not change with
+        thickness, so n_interface = C_it / C_ox scales with t_ox.
+        """
+        c = self.const
+        if cond.t_ox_nm is None or cond.t_ox_nm == c.t_ox_nm:
+            return self
+        return replace(self, const=replace(c, t_ox_nm=cond.t_ox_nm,
+                                           n_interface=c.n_interface * cond.t_ox_nm / c.t_ox_nm))
+
     def simulate(
         self, params: Mapping[str, float], active: frozenset[str], cond: Condition, vg: np.ndarray
     ) -> SimResult:
+        split = self.for_condition(cond)
+        if split is not self:
+            return split.simulate(params, active, Condition(cond.vd, cond.length_um), vg)
         vg = np.asarray(vg, dtype=float)
         c = self.const
         if not np.isfinite(list(params.values())).all() or params["mu0"] <= 0:

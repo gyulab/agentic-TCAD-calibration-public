@@ -15,6 +15,7 @@ from .config import DemoConfig
 from .controller import Controller, Planner, Reviewer, RulePlanner
 from .device import synthesize_measurement
 from .evaluate import evaluate_fixed, summarize
+from .identifiability import IdentifiabilityError, check_identifiability
 from .log import ActionLog, _clean
 from .tools import Workspace
 
@@ -25,13 +26,16 @@ def all_conditions(cfg: DemoConfig):
         for c in conds:
             if c not in seen:
                 seen.append(c)
-    return seen
+    # Thickness splits go last, so adding one never changes the synthetic noise of the other curves.
+    return [c for c in seen if c.t_ox_nm is None] + [c for c in seen if c.t_ox_nm is not None]
 
 
 def run_demo(cfg: DemoConfig, out_dir: Path | None, planner: Planner | None = None,
              reviewer: Reviewer | None = None, log: ActionLog | None = None) -> dict:
     log = log or ActionLog(None if out_dir is None else out_dir / "action_log.jsonl")
     conds = all_conditions(cfg)
+    if any(c.t_ox_nm is not None for c in conds) and not getattr(cfg.simulator, "supports_thickness_splits", False):
+        raise ValueError("a split sets t_ox_nm, but the simulator does not declare supports_thickness_splits")
     measured = synthesize_measurement(cfg.truth, cfg.truth_params, cfg.truth_active, conds, cfg.vg,
                                       cfg.seed, cfg.noise["lognormal_sigma"], cfg.noise["floor_noise_A"])
     ws = Workspace(cfg.simulator, measured, cfg.vg, cfg.specs, cfg.groups, cfg.objective,
@@ -54,6 +58,13 @@ def run_demo(cfg: DemoConfig, out_dir: Path | None, planner: Planner | None = No
         for which in ("initial", "final"):
             heldout[split][which]["summary"] = summarize(heldout[split][which]["rows"])
     log.record("evaluation", splits={k: {w: v[w]["summary"] for w in ("initial", "final")} for k, v in heldout.items()})
+    identifiability = None
+    if cfg.identifiability.enabled:
+        try:
+            identifiability = check_identifiability(ws, result.params, result.active, cfg.identifiability, log)
+        except IdentifiabilityError as exc:  # the optional step must not cost the run its outputs
+            log.record("identifiability_error", reason=str(exc))
+            identifiability = {"error": str(exc)}
 
     summary = _clean({
         "description": "Synthetic-data demonstration; numbers are NOT the paper's results.",
@@ -78,6 +89,8 @@ def run_demo(cfg: DemoConfig, out_dir: Path | None, planner: Planner | None = No
         "final_params_hash": heldout["calibration"]["final"]["params_hash"],
         "environment": {"python": platform.python_version(), "numpy": np.__version__, "scipy": scipy.__version__},
     })
+    if identifiability is not None:
+        summary["identifiability"] = _clean(identifiability)
     if out_dir is not None:
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")

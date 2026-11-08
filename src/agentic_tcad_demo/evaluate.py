@@ -18,13 +18,16 @@ def evaluate_fixed(ws: Workspace, params: Mapping[str, float], active: frozenset
     frozen = dict(params)
     rows = []
     for cond in conditions:
+        where = {"condition": cond.label, "vd": cond.vd, "length_um": cond.length_um}
+        if cond.t_ox_nm is not None:
+            where["t_ox_nm"] = cond.t_ox_nm
         res = ws.simulate(frozen, active, cond)
         if not res.converged:
-            rows.append({"condition": cond.label, "vd": cond.vd, "length_um": cond.length_um, "converged": False})
+            rows.append({**where, "converged": False})
             continue
         s = score_curve(ws.vg, res.id, ws.measured[cond], ws.objective_spec)
         rows.append({
-            "condition": cond.label, "vd": cond.vd, "length_um": cond.length_um, "converged": True,
+            **where, "converged": True,
             "dVth_mV": 1e3 * (s.sim.vth - s.meas.vth),
             "dlogIon_dec": float(np.log10(s.sim.ion) - np.log10(s.meas.ion)),
             "dSS_mV_per_dec": 1e3 * (s.sim.ss - s.meas.ss),

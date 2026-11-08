@@ -11,6 +11,7 @@ import yaml
 
 from .controller import Component, ControllerSettings
 from .device import CompactTFT, Condition, DeviceConstants, Simulator
+from .identifiability import IdentifiabilitySettings
 from .objective import ObjectiveSpec
 from .parameters import ParameterGroup, ParameterSpec
 
@@ -36,10 +37,16 @@ class DemoConfig:
     ofat_step: float
     review_mode: str
     approved_components: tuple[str, ...]
+    identifiability: IdentifiabilitySettings = IdentifiabilitySettings()
 
 
-def _conditions(block: dict) -> list[Condition]:
-    return [Condition(float(vd), float(block["length_um"])) for vd in block["vd"]]
+def _conditions(block: dict | list) -> list[Condition]:
+    """{length_um, vd: [...], optional t_ox_nm for a thickness split}, or a list of such blocks."""
+    if isinstance(block, list):
+        return [c for b in block for c in _conditions(b)]
+    t_ox = block.get("t_ox_nm")
+    return [Condition(float(vd), float(block["length_um"]), None if t_ox is None else float(t_ox))
+            for vd in block["vd"]]
 
 
 def _load_plugin(entry: str, options: dict) -> Simulator:
@@ -94,6 +101,13 @@ def load_config(path: str | Path) -> DemoConfig:
     ctrl = dict(raw.get("controller", {}))
     ofat_step = float(ctrl.pop("ofat_step", 0.02))
     review = raw.get("review", {})
+    ident = dict(raw.get("identifiability") or {})
+    identifiability = IdentifiabilitySettings(
+        enabled=bool(ident.get("enabled", False)),
+        noise_dec=float(ident.get("noise_dec", IdentifiabilitySettings.noise_dec)),
+        profile_points=int(ident.get("profile_points", IdentifiabilitySettings.profile_points)),
+        candidates=tuple(_conditions(ident.get("candidates", []))),
+    )
     return DemoConfig(
         raw=raw, seed=int(raw["run"]["seed"]), vg=vg, constants=constants, truth=truth,
         truth_params={k: float(v) for k, v in truth_block["parameters"].items()},
@@ -104,4 +118,5 @@ def load_config(path: str | Path) -> DemoConfig:
         objective=objective, controller=ControllerSettings(**ctrl), ofat_step=ofat_step,
         review_mode=review.get("mode", "policy"),
         approved_components=tuple(review.get("approve_components", [])),
+        identifiability=identifiability,
     )
