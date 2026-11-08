@@ -11,7 +11,12 @@ class Simulator(Protocol):
 **Inputs**
 - `params`: physical parameter values by name.
 - `active`: the set of enabled model components.
-- `cond`: the drain bias `vd` [V] and the channel length `length_um` [µm].
+- `cond`: the drain bias `vd` [V] and the channel length `length_um` [µm]. A gate-dielectric thickness
+  split also sets `t_ox_nm` (None means the nominal device). The workflow passes such a condition only to
+  a simulator whose class sets `supports_thickness_splits = True`. Otherwise a thickness split in a split
+  block is an error, and the identifiability check skips its thickness candidates. A subclass of
+  `CompactTFT` that overrides `simulate()` inherits the flag, so it must honour `t_ox_nm` or set the flag
+  to False.
 - `vg`: the gate-voltage grid [V].
 
 **Output.** Return `SimResult(vg, id, converged, message)`, where `id` is |I<sub>D</sub>| in A on the same

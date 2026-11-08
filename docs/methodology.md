@@ -172,7 +172,8 @@ conditions, so the held-out drain set is strictly disjoint.
 - **Identifiability.** φ<sub>G</sub> and Q<sub>f</sub> enter only through V<sub>T</sub>, so only their
   combination is identified. In the default run they end at 4.50 eV and 9.2×10¹² cm⁻² (truth 4.30 eV and
   6×10¹² cm⁻²), with the correct V<sub>T</sub>. The paper makes the same point: fitted variables are
-  calibration-effective descriptors, not extractions.
+  calibration-effective descriptors, not extractions. The optional check in §7 finds this combination and
+  ranks candidate conditions; of those listed, only the thickness splits separate the two.
 - **μ<sub>0</sub> compensation.** μ<sub>0</sub> converges to about 24 cm²/Vs (truth 18) because it
   absorbs the gate-dependent mobility that the calibration model lacks.
 - **Close recovery.** φ<sub>SD</sub> and N<sub>tail</sub> are recovered closely (4.348 eV and
@@ -198,3 +199,80 @@ conditions, so the held-out drain set is strictly disjoint.
   `tests/test_acceptance.py` with an injected failure.
 - **Scope.** The demo does not implement RAG, the paper's Gaussian/tail DOS models, the 4% W process
   test, or any Sentaurus feature.
+
+## 7. Identifiability check (`identifiability.py`, optional)
+
+The paper and §6 treat the calibrated values as calibration-effective descriptors, not extractions. The
+calibration data may fix only some combinations of them. This optional step computes which combinations
+the calibration data leave undetermined, before the values are interpreted, and ranks the candidate
+conditions listed in
+`identifiability.candidates` by the information each would add there **[demo addition, not part of the
+paper's workflow]**. Enable it with `--identifiability` or `identifiability.enabled: true`. It only
+simulates. It does not change the calibration result or J, and it does not read the held-out data.
+
+In this compact model the answer is known in closed form. V<sub>T</sub> = (φ<sub>G</sub> − χ) −
+qQ<sub>f</sub>/C<sub>ox</sub>, so only φ<sub>G</sub> − (q/C<sub>ox</sub>)Q<sub>f</sub> is fixed (§6), and only
+a change of C<sub>ox</sub> can separate the two. The default run is therefore a known-answer example. The
+step is meant for simulators whose equations cannot be inspected, such as a plug-in TCAD adapter
+(`private_simulator.md`). With such a simulator its cost matters: in the default run it makes about 1300
+simulator calls, 3.5× the calibration's 362, and about 80% of them are the profiles of step 2. Their
+number scales with `profile_points` and with the number of flagged parameters.
+
+**Likelihood.** Gaussian in log<sub>10</sub>\|I<sub>D</sub>\| on the calibration points above the 10 pA
+floor, with σ = `noise_dec` (0.013 dec, the 3% synthetic noise). Because of the model-form error (§1),
+the best log-current fit is worse than that, so σ is raised to its residual RMS, σ<sub>eff</sub>
+(0.059 dec in the default run). The model error is thus treated like independent noise. The approved
+bounds enter steps 1 and 3 as a Gaussian prior whose variance, 1/12 in normalized units, is that of a
+uniform distribution over the bounds. Along an exact degeneracy they are the only information.
+
+1. **Find.** F = S<sup>T</sup>S/σ<sub>eff</sub>², with S = ∂log<sub>10</sub>I<sub>D</sub>/∂x from central
+   differences (step 10⁻⁴) at the calibrated point. An eigen-direction of F is flagged when it carries
+   less information than the bounds (eigenvalue below 12). A numerically zero one (below 10⁻¹⁰ of the
+   largest) is an exact degeneracy. When several exact degeneracies share the null space, the check uses
+   its sparsest basis, one combination per vector. For two parameters, it reports the combination that
+   the data determine.
+2. **Verify.** Each parameter in a flagged direction gets a profile likelihood around the best
+   log-current fit: the parameter is fixed, the others are refitted with bounded least squares, and Δχ² is
+   computed. The profile is followed outward over a grid (`profile_points` across the approved range, plus
+   1–4 linear 1σ around the best fit) until Δχ² reaches 3.84 (95%, one parameter), and that edge is
+   bisected six times. An interval that reaches an approved bound means that the data do not determine
+   the parameter within the bounds.
+3. **Design.** Each candidate in `identifiability.candidates` is simulated at the calibrated point; it
+   needs no data. A candidate resolves a flagged direction v if it raises the information along v, with
+   the other parameters free, by at least the 12 that the bounds provide:
+   1/(v<sup>T</sup>C′v) − 1/(v<sup>T</sup>Cv) ≥ 12, where C and C′ are the covariances without and with
+   the candidate. Among those, the one with the largest Δlog det F (D-optimal gain) is recommended,
+   together with the block to add to `splits.calibration`. Only the listed candidates are ranked, and a
+   thickness split needs new devices.
+4. **Resolve.** This step is not automatic. Add the recommended block to the calibration split and run
+   again, for example
+   `calibration: [{length_um: 1.0, vd: [0.05, 1.0]}, {length_um: 1.0, vd: [0.05], t_ox_nm: 14.0}]`.
+
+**Thickness splits [demo choice].** A condition may set `t_ox_nm`, the gate-dielectric thickness of a
+split device. Q<sub>f</sub> and C<sub>it</sub> are interface properties and stay fixed, so
+C<sub>it</sub>/C<sub>ox</sub> scales with t<sub>ox</sub>. Thickness-split curves are synthesized after all
+other curves, so adding one does not change their noise. A plug-in simulator receives such conditions only
+if it declares `supports_thickness_splits = True` (see `private_simulator.md`).
+
+**Default run (seed 2609).**
+
+| Step | Result |
+|---|---|
+| Find | One exact degeneracy, φ<sub>G</sub>–Q<sub>f</sub> (eigenvalue ≈10⁻¹⁶ of the largest, i.e. round-off). The data fix only φ<sub>G</sub> − 6.333×10⁻¹⁴ eV cm² × Q<sub>f</sub> ≈ 3.92 eV, which is the calibrated V<sub>T</sub> + χ; the slope is q/C<sub>ox</sub>. φ<sub>SD</sub>, μ<sub>0</sub> and N<sub>tail</sub> are not flagged |
+| Verify | Q<sub>f</sub> from about 4.5×10¹² cm⁻² to its upper bound, and φ<sub>G</sub> from its lower bound to about 4.55 eV. Both ends are the approved bounds carried along the degenerate line |
+| Design | The five held-out V<sub>D</sub> and L conditions add no information along φ<sub>G</sub>–Q<sub>f</sub> (numerically zero). The three t<sub>ox</sub> splits add about 10⁴–10⁵, against 12 for the bounds. Recommended: t<sub>ox</sub> = 14 nm at V<sub>D</sub> = 0.05 V, which has the largest Δlog det F |
+| Resolve | With that split in the calibration set, the run ends at Q<sub>f</sub> ≈ 5.6×10¹² cm⁻² and φ<sub>G</sub> ≈ 4.29 eV (truth 6×10¹², 4.30), and nothing is flagged. Identifiable is not the same as accurate: μ<sub>0</sub> moves from about 24 to 29 cm²/Vs (truth 18), N<sub>tail</sub> from 2.0 to 2.1×10¹⁹ and φ<sub>SD</sub> from 4.35 to 4.37 eV (truth 2×10¹⁹, 4.35). Most of the μ<sub>0</sub> shift comes from where the controller stops: the check's log-current best fit of the same data (`best_fit`) gives μ<sub>0</sub> ≈ 21 cm²/Vs. The calibration takes about twice as many simulator calls |
+
+Along the degenerate line the held-out conditions predict the same currents, so they carry no information
+on it. This is consistent with the paper, which uses them to test transfer, not parameter uniqueness. The
+synthetic truth follows the same thickness assumption as the model, so the resolution is expected by
+construction; changing the gate-dielectric thickness is also the classical way to separate a work function
+from a fixed charge (flat-band voltage versus oxide thickness). What the check adds is a computed ranking
+of the listed candidates. It took about 2 s here.
+
+**Limits.** The intervals assume independent errors. Here model-form error dominates (σ<sub>eff</sub> is
+4.5× the noise) and is correlated along each curve, so the intervals are too narrow, and "not flagged"
+means identifiable within the bounds, not accurate. The design numbers rest on the same assumption; in the
+default run the t<sub>ox</sub> splits clear the threshold by more than 10³×. An exact degeneracy does not
+depend on this. Find and Design linearize at the calibrated point, the values that would be interpreted.
+Verify profiles around the best log-current fit, which in general differs from the J optimum.

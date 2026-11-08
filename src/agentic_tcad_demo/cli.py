@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 from .config import load_config
@@ -27,6 +28,9 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--planner-name", default="unnamed", help="who answers for --planner external (recorded)")
     run.add_argument("--replay-log", help="action_log.jsonl to replay for --planner replay")
     run.add_argument("--interactive", action="store_true", help="ask on the terminal before each model activation")
+    run.add_argument("--identifiability", action="store_true",
+                     help="after the held-out evaluation, flag parameter combinations the calibration data leave "
+                          "undetermined and rank candidate conditions (docs/methodology.md section 7)")
     run.add_argument("--no-figures", action="store_true")
     anim = sub.add_parser("animate", help="render a recorded run (action_log.jsonl) as MP4 and GIF")
     anim.add_argument("--config", default="configs/synthetic_demo.yaml")
@@ -50,6 +54,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     cfg = load_config(args.config)
+    if args.identifiability:
+        cfg.identifiability = replace(cfg.identifiability, enabled=True)
     if args.planner == "llm":
         from .llm import LLMConfigError, LLMPlanner
         try:
@@ -87,5 +93,9 @@ def main(argv: list[str] | None = None) -> int:
         f = v["final"]
         print(f"{split:<19}: max|dVth| {f['max_abs_dVth_mV']:.3g} mV, max|dlogIon| {f['max_abs_dlogIon_dec']:.3g} dec "
               f"(initial model: {v['initial']['max_abs_dVth_mV']:.3g} mV, {v['initial']['max_abs_dlogIon_dec']:.3g} dec)")
+    if "identifiability" in s:
+        from .identifiability import summary_lines
+        for i, line in enumerate(summary_lines(s["identifiability"])):
+            print(f"{'identifiability' if i == 0 else '':<19}: {line}")
     print(f"outputs            : {out_dir}/action_log.jsonl, summary.json, final_params.yaml")
     return 0

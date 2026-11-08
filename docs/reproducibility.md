@@ -16,14 +16,15 @@
 
 ## Runtime
 On a laptop-class CPU the full run takes about 5 s, including figures. Calibration makes about 360
-simulator calls, held-out evaluation makes a few more, and the test suite takes about 20–30 s.
+simulator calls, held-out evaluation makes a few more, and the test suite takes about 25–35 s. With
+`--identifiability`, the check adds about 1300 simulator calls (about 2 s).
 
 ## Outputs (`--out`, default `outputs/demo/`)
 
 | File | Content |
 |---|---|
-| `action_log.jsonl` | One JSON event per line. Events: `run_start`, `baseline`, `diagnosis`, `ofat_ranking`, `proposal`, `trial`, `approval`, `activation`, `parameter_updates_exhausted`, `planner_error`, `stop`, `evaluation` |
-| `summary.json` | J trajectory, weighted terms per step, accepted updates, rejected-trial count, activations, stop reason, `evaluation` tables (calibration, held-out drain, held-out length) for the initial and final models, final-parameter hash, versions |
+| `action_log.jsonl` | One JSON event per line. Events: `run_start`, `baseline`, `diagnosis`, `ofat_ranking`, `proposal`, `trial`, `approval`, `activation`, `parameter_updates_exhausted`, `planner_error`, `stop`, `evaluation`, and with `--identifiability` also `identifiability_find`, `identifiability_verify`, `identifiability_design` (or `identifiability_error`) |
+| `summary.json` | J trajectory, weighted terms per step, accepted updates, rejected-trial count, activations, stop reason, `evaluation` tables (calibration, held-out drain, held-out length) for the initial and final models, final-parameter hash, versions, and with `--identifiability` the `identifiability` report |
 | `final_params.yaml` | Final parameters and active components |
 | `figures/*.png` | The five figures shown in the README |
 

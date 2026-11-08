@@ -41,6 +41,7 @@ src/agentic_tcad_demo/controller.py
 src/agentic_tcad_demo/device.py
 src/agentic_tcad_demo/evaluate.py
 src/agentic_tcad_demo/external.py
+src/agentic_tcad_demo/identifiability.py
 src/agentic_tcad_demo/llm.py
 src/agentic_tcad_demo/log.py
 src/agentic_tcad_demo/metrics.py
@@ -58,6 +59,7 @@ tests/conftest.py
 tests/test_acceptance.py
 tests/test_animate.py
 tests/test_device.py
+tests/test_identifiability.py
 tests/test_llm_optional.py
 tests/test_metrics_objective.py
 tests/test_nat_plugin.py

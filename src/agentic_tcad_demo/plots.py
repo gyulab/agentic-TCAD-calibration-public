@@ -42,7 +42,8 @@ def _transfer(fig_path, vg, measured, curves, title, sim_label, sim_color):
             ax.plot(vg, curves[cond] * (1 if scale == "log" else 1e6), color=sim_color, lw=2,
                     label=sim_label if cond is next(iter(measured)) else None)
             if scale == "log":
-                ax.annotate(f"V_D={cond.vd:g} V", (vg[-1], meas[-1]), xytext=(-4, 6),
+                tox = "" if cond.t_ox_nm is None else f", t_ox={cond.t_ox_nm:g} nm"
+                ax.annotate(f"V_D={cond.vd:g} V{tox}", (vg[-1], meas[-1]), xytext=(-4, 6),
                             textcoords="offset points", ha="right", fontsize=7, color=INK_2)
         ax.set_yscale(scale)
         ax.set_xlabel("V_G (V)", fontsize=9, color=INK)
@@ -128,7 +129,8 @@ def write_figures(out: dict, fig_dir: Path) -> list[Path]:
     for split in ("calibration", "heldout_drain", "heldout_length"):
         for r in s["evaluation_rows"][split]["final"]:
             rows.append((split, r))
-    labels = [f"{'cal' if sp == 'calibration' else 'held-out'}\nL={r['length_um']:g}\nV_D={r['vd']:g}" for sp, r in rows]
+    labels = [f"{'cal' if sp == 'calibration' else 'held-out'}\nL={r['length_um']:g}\nV_D={r['vd']:g}"
+              + (f"\nt_ox={r['t_ox_nm']:g} nm" if "t_ox_nm" in r else "") for sp, r in rows]
     colors = [INK_2 if sp == "calibration" else BLUE for sp, _ in rows]
     fig, axes = plt.subplots(1, 2, figsize=(10, 3.8))
     for ax, key, unit in zip(axes, ("dVth_mV", "dlogIon_dec"), ("ΔV_th (mV)", "Δlog10 I_on (dec)")):

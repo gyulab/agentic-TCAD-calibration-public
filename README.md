@@ -158,6 +158,16 @@ accuracy. The value here is the inspectable workflow, its guard rails, and its t
   [`docs/private_simulator.md`](docs/private_simulator.md). Keep any proprietary adapter, deck, or
   license configuration outside this repository.
 - **Human review.** `--interactive` asks on the terminal before each model activation.
+- **Identifiability check.** `--identifiability` adds a step after the held-out evaluation. It turns the
+  identifiability note in `docs/methodology.md` §6 into a computed check: it flags the parameter
+  combinations that the calibration data leave undetermined (Fisher information, profile likelihood), and
+  it ranks the candidate conditions listed in the config by the information they would add there. In the
+  default run it finds the known φ<sub>G</sub>–Q<sub>f</sub> combination, and among the candidates only the
+  gate-dielectric thickness splits (t<sub>ox</sub> = 14 nm recommended) add information along it. The
+  synthetic truth follows the same thickness assumption, so that resolution is expected by construction.
+  The step is meant for plug-in simulators whose equations cannot be inspected. It costs about 3.5× the
+  calibration's simulator calls here, mostly for profile likelihoods. See
+  [`docs/methodology.md`](docs/methodology.md) §7.
 
 ## Notes
 
