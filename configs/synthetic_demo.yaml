@@ -90,3 +90,16 @@ controller:
 review:
   mode: policy                # or "interactive" (also: --interactive on the CLI)
   approve_components: [fixed_charge, tail_states]
+
+# Optional step after the held-out evaluation (also: --identifiability on the CLI): which parameter
+# combinations do the calibration data leave undetermined, and which listed candidate would add information there?
+identifiability:
+  enabled: false
+  noise_dec: 0.013            # sigma of log10 I_D: the 3 % lognormal noise of the synthetic measurement
+  profile_points: 13          # profile-likelihood grid across each flagged parameter's approved range
+  candidates:                 # simulated only; a thickness split keeps Q_f and C_it, so C_it/C_ox scales with t_ox
+    - {length_um: 1.0, vd: [0.1, 0.2, 0.5]}           # the held-out drain-bias tests
+    - {length_um: 2.0, vd: [0.05, 1.0]}               # the held-out length tests
+    - {length_um: 1.0, vd: [0.05], t_ox_nm: 5.0}      # gate-dielectric thickness splits (new devices)
+    - {length_um: 1.0, vd: [0.05], t_ox_nm: 10.0}
+    - {length_um: 1.0, vd: [0.05], t_ox_nm: 14.0}
